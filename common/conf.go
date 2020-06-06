@@ -7,7 +7,7 @@ import (
 	"gopkg.in/gcfg.v1"
 )
 
-// Config 配置  suiin你
+// Config 配置
 type Config struct {
 	// AppConf app基础配置
 	AppConf struct {
