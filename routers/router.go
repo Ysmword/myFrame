@@ -3,7 +3,6 @@ package routers
 import (
 	"fmt"
 	"helloweb/common"
-	"helloweb/conf"
 	"helloweb/controllers"
 	"helloweb/logger"
 	"log"
@@ -123,7 +122,7 @@ func StartServer() {
 	// 这里进行路由注册 serviceObjectTable["exmple"] = &ControllerInfo{....}
 	
 	server := http.Server{
-		Addr:    ":" + conf.Conf.AppConf.Httpport,
+		Addr:    ":" + common.Conf.AppConf.Httpport,
 		Handler: &hellowebHTTPHandler{},
 	}
 

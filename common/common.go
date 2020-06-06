@@ -1,7 +1,6 @@
 package common
 
 import (
-	"flag"
 	"log"
 	"os"
 	"path/filepath"
@@ -15,8 +14,7 @@ var (
 	HomePath string
 	// WsUserTable 创建一个websocket用户表
 	WsUserTable = make(map[*websocket.Conn]string)
-	// GitFlag 是否开启自动提交，默认值not
-	GitFlag = flag.String("acp","not","enable auto submit or not,defualt value is not")
+	
 
 	// 发送用户
 	senderAddr    = "ysm_515@163.com"
@@ -29,29 +27,11 @@ var (
 )
 
 func init() {
-
-	flag.Parse()
 	log.SetFlags(log.LstdFlags | log.Lshortfile | log.Lmicroseconds)
 	var err error
 	HomePath, err = filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
 		log.Fatal(err)
-	}
-
-	switch *GitFlag {
-	case "not":
-		log.Println("不开启自动提交代码到仓库的功能")
-		return
-	case "yes":
-		log.Println("开启自动提交代码到仓库的功能")
-		err := GitCmd()
-		if err!=nil{
-			log.Println(err)
-		}
-		os.Exit(0)
-	default:
-		log.Println("输入不正确，可以参考：-acp=yes")
-		os.Exit(0)
 	}
 }
 

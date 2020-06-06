@@ -1,5 +1,10 @@
 cd {{.GitShellFilePath}}
 
+echo "set git config"
+git config --global user.email "{{.GitEmail}}"
+git config --global user.name "{{.GitName}}"
+echo "set git config successfully"
+
 echo "start save to workspace"
 git add .
 echo "save to workspace successfully"
@@ -13,5 +18,5 @@ git pull
 echo "pull the latest item successfully"
 
 echo "start push the latest item"
-git push
+git push origin master
 echo "push the latest item successfully"

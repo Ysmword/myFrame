@@ -31,6 +31,10 @@ type GitShellInfo struct {
 	GitShellFilePath string `json:"gitShellFilePath"`
 	// CommitInfo 提交信息
 	CommitInfo string `json:"commitInfo"`
+	// GitEmail 提交的用户邮箱
+	GitEmail string `json:"gitEmail"`
+	// GitName 提交用户名
+	GitName string  `json:"gitName"`
 }
 
 // ReadGitShellTmp 读取gitShell.tmp文件
@@ -113,8 +117,28 @@ func WriteGitShellFile(temp string) (string,error) {
 		return "",err
 	}
 
+
+	if Conf.Git.GitEmail == "" {
+		err := fmt.Errorf("Conf.Git.GitEmail is null")
+		log.Println(err)
+		return "",err
+	}
+
+	if Conf.Git.GitName == "" {
+		err := fmt.Errorf("Conf.Git.GitName is null")
+		log.Println(err)
+		return "",err
+	}
+
+	
+
 	// 实例化一个GitShellInfo对象  更本地项目连接在一起
-	gitShellInfo := &GitShellInfo{GitShellFilePath: HomePath, CommitInfo: commitInfo}
+	gitShellInfo := &GitShellInfo{
+		GitShellFilePath: HomePath,
+		 CommitInfo: commitInfo,
+		 GitEmail: Conf.Git.GitEmail,
+		 GitName: Conf.Git.GitName,
+		}
 
 	// 模板填充
 	err = gitTemp.Execute(f, gitShellInfo)

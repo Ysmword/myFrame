@@ -1,7 +1,6 @@
-package conf
+package common
 
 import (
-	"helloweb/common"
 
 	"log"
 
@@ -34,6 +33,15 @@ type Config struct {
 		// Dbname 数据库名字
 		Dbname string
 	}
+	// Git git 所需要的数据
+	Git struct{
+		// GitEmail 用户邮箱
+		GitEmail string
+		// GitName 用户账号
+		GitName string
+		// GitPW 用户密码
+		GitPW string
+	}
 }
 
 // Conf 配置变量
@@ -41,11 +49,11 @@ var Conf = new(Config)
 
 // ReadConfig 读取配置文件
 func ReadConfig()  {
-	if common.HomePath == "" {
-		log.Fatal("初始化app路径失败，HomePath = ", common.HomePath)
+	if HomePath == "" {
+		log.Fatal("初始化app路径失败，HomePath = ", HomePath)
 	}
 
-	configPath := common.HomePath + "/" + "conf" + "/" + "conf.ini"
+	configPath := HomePath + "/" + "conf.ini"
 
 	log.Println("配置文件路径",configPath)
 

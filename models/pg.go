@@ -7,32 +7,32 @@ import (
 	_ "github.com/lib/pq"
 	"log"
 
-	"helloweb/conf"
+	"helloweb/common"
 )
 
 // db postgres数据库的变量
 var db *sql.DB
 
 // InitDB 初始化数据库
-func InitDB()  {
-	if conf.Conf == nil {
+func InitDB() {
+	if common.Conf == nil {
 		log.Fatal("conf.Conf is nil")
 	}
-	if conf.Conf.Postgres.Dbname == "" || conf.Conf.Postgres.Host == "" || conf.Conf.Postgres.Password == "" || conf.Conf.Postgres.Sslmode == "" || conf.Conf.Postgres.User == "" {
+	if common.Conf.Postgres.Dbname == "" || common.Conf.Postgres.Host == "" || common.Conf.Postgres.Password == "" || common.Conf.Postgres.Sslmode == "" || common.Conf.Postgres.User == "" {
 		log.Fatal("illegal database connect info")
 	}
-	if conf.Conf.Postgres.Port < 0 {
+	if common.Conf.Postgres.Port < 0 {
 		log.Fatal("Conf.Postgres.Port is illegal")
 	}
 
 	// 打开数据库的信息
 	dbInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-		conf.Conf.Postgres.Host,
-		conf.Conf.Postgres.Port,
-		conf.Conf.Postgres.User,
-		conf.Conf.Postgres.Password,
-		conf.Conf.Postgres.Dbname,
-		conf.Conf.Postgres.Sslmode,
+		common.Conf.Postgres.Host,
+		common.Conf.Postgres.Port,
+		common.Conf.Postgres.User,
+		common.Conf.Postgres.Password,
+		common.Conf.Postgres.Dbname,
+		common.Conf.Postgres.Sslmode,
 	)
 
 	var err error
