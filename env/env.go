@@ -10,7 +10,7 @@ import(
 	"helloweb/routers"
 )
 
-// InitAll 初始化项目  这里修改以下下
+// InitAll 初始化项目
 func InitAll(){
 
 	log.Println("读取配置文件")
