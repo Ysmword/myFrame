@@ -10,6 +10,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 // 这里实现对git的操作基础操作   这样封装，就不需要每个地方都要调用go-git包，我们同意调用就行了
 
@@ -36,18 +37,18 @@ type GitShellInfo struct {
 func ReadGitShellTmp() (string, error) {
 
 	if HomePath == "" {
-		err := fmt.Error("ReadGitShellTmp HomePath is null")
+		err := fmt.Errorf("ReadGitShellTmp HomePath is null")
 		log.Println(err)
-		return err
+		return "",err
 	}
 
 	tmpFileName:= "gitShell.tmp"
 	tmpPath := HomePath + "/" + tmpFileName
 
 	if !IsExist(tmpPath){
-		err := fmt.Error("no file: "+tmpPath)
+		err := fmt.Errorf("no file: "+tmpPath)
 		log.Println(err)
-		return err
+		return "",err
 	}
 
 	shellTmp, err := ioutil.ReadFile(tmpPath)
@@ -64,13 +65,13 @@ func ReadGitShellTmp() (string, error) {
 func WriteGitShellFile(temp string) (string,error) {
 
 	if temp == ""{
-		err := fmt.Error("WriteGitShellFile temp is null")
+		err := fmt.Errorf("WriteGitShellFile temp is null")
 		log.Println(err)
 		return "",err
 	}
 
 	if HomePath == "" {
-		err := fmt.Error("ReadGitShellTmp HomePath is null")
+		err := fmt.Errorf("ReadGitShellTmp HomePath is null")
 		log.Println(err)
 		return "",err
 	}
@@ -131,7 +132,7 @@ func GitCmd()error{
 	log.Println("当前的操作系统",runtime.GOOS)
 
 	if runtime.GOOS!="linux"{
-		err := fmt.Error("暂时不支持linux系统意外的操作系统")
+		err := fmt.Errorf("暂时不支持linux系统意外的操作系统")
 		log.Println(err)
 		return err
 	}
@@ -140,14 +141,14 @@ func GitCmd()error{
 	temp, err := ReadGitShellTmp()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	// 根据模板写入文件
-	gitShellFilePath,err = WriteGitShellFile(temp)
+	gitShellFilePath,err := WriteGitShellFile(temp)
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 	log.Println("gitShellFilePath:",gitShellFilePath)
 	// 执行文件
@@ -157,9 +158,10 @@ func GitCmd()error{
 	data, err := cmd.Output()
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 	log.Println(string(data))
+	return nil
 }
 
 
