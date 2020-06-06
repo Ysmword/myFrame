@@ -1,0 +1,7 @@
+/*{{.Struct.Name}} {{ .Struct.Comment}} represents {{ .Struct.Table.Schema }}.{{ .Struct.Table.Name }} */
+type {{ .Struct.Name }} struct {
+{{- range .Struct.Fields }}
+	{{ .Name }} {{ .Type }}  `json:"{{.Name}}"`
+{{- end }}
+}
+
