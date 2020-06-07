@@ -1,8 +1,6 @@
 package common
 
 import (
-	"io/ioutil"
-	"os"
 	"strings"
 	"testing"
 )
