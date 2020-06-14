@@ -10,13 +10,16 @@ import (
 	"log"
 	"time"
 	"os"
+	// valid "github.com/asaskevich/govalidator"
 )
 
 // GitFlag 是否开启自动提交，默认值not
-var GitFlag = flag.String("acp", "not", "enable auto submit or not,defualt value is not")
+var GitFlag = flag.String("acp", "not", "enable auto submit yes or not,defualt value is not")
 
 // InitAll 初始化项目
 func InitAll() {
+
+	// valid.SetFieldsRequiredByDefault(true)
 
 	log.Println("读取配置文件")
 	common.ReadConfig()
@@ -25,7 +28,6 @@ func InitAll() {
 	switch *GitFlag {
 	case "not":
 		log.Println("不开启自动提交代码到仓库的功能")
-		return
 	case "yes":
 		log.Println("开启自动提交代码到仓库的功能")
 		err := common.GitCmd()

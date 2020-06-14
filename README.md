@@ -21,3 +21,9 @@
 - 静态服务器搭建（运行之后，可以直接访问：http://localhost:端口/file，就可以看到整个项目的静态文件）
 - 一键生成数据库表的结构体映射文件
 - 日志处理
+
+
+## 有一处bug：调用github.com/asaskevich/govalidator验证器的时候，无法实现optional的功能（为空值的时候，跳过验证）
+- github.com/asaskevich/govalidator看他们的issue，提供的方法是来去这个项目
+    - go get github.com/asaskevich/govalidator@772b7c5f8a56857abeff450a08976b680d67f732 能够解决，但是在这里不能实现
+    - 解决办法：后期自己写一个验证器

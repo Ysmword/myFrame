@@ -1,26 +1,27 @@
 package common
 
-
 import (
-	"fmt"
-	"os/exec"
-	"runtime"
-	"log"
 	"bufio"
+	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"os"
+	"os/exec"
+	"runtime"
+	valid "github.com/asaskevich/govalidator"
 	"strings"
 )
+
 // 这里实现对git的操作基础操作   这样封装，就不需要每个地方都要调用go-git包，我们同意调用就行了
 
-/* 
+/*
 1、需求就是能够：自己写完代码之后，根据当前的分支，能够实现自动写入暂存区，自动拉取，自动提交
 */
 
 var (
 	// GOOS 当前运行的操作系统
-	GOOS = runtime.GOOS 
+	GOOS = runtime.GOOS
 	// GitShellFileName 存放git add .,git commit,git push的shell文件,window10条件下，要保证有git.exe文件，才能运行脚本文件
 	GitShellFileName = "gitShell.sh"
 )
@@ -28,13 +29,13 @@ var (
 // GitShellInfo gitShellFile模板信息
 type GitShellInfo struct {
 	// git shell脚本文件路径
-	GitShellFilePath string `json:"gitShellFilePath"`
+	GitShellFilePath string `json:"gitShellFilePath" valid:"type(string)"`
 	// CommitInfo 提交信息
-	CommitInfo string `json:"commitInfo"`
+	CommitInfo string `json:"commitInfo" valid:"type(string)"`
 	// GitEmail 提交的用户邮箱
-	GitEmail string `json:"gitEmail"`
+	GitEmail string `json:"gitEmail" valid:"email"`
 	// GitName 提交用户名
-	GitName string  `json:"gitName"`
+	GitName string `json:"gitName" valid:"type(string)"`
 }
 
 // ReadGitShellTmp 读取gitShell.tmp文件
@@ -43,16 +44,16 @@ func ReadGitShellTmp() (string, error) {
 	if HomePath == "" {
 		err := fmt.Errorf("ReadGitShellTmp HomePath is null")
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 
-	tmpFileName:= "gitShell.tmp"
+	tmpFileName := "gitShell.tmp"
 	tmpPath := HomePath + "/" + tmpFileName
 
-	if !IsExist(tmpPath){
-		err := fmt.Errorf("no file: "+tmpPath)
+	if !IsExist(tmpPath) {
+		err := fmt.Errorf("no file: " + tmpPath)
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 
 	shellTmp, err := ioutil.ReadFile(tmpPath)
@@ -64,20 +65,19 @@ func ReadGitShellTmp() (string, error) {
 	return string(shellTmp), nil
 }
 
-
 // WriteGitShellFile 生成gitShellFile.sh temp 模板 返回生成文件之后文件路径
-func WriteGitShellFile(temp string) (string,error) {
+func WriteGitShellFile(temp string) (string, error) {
 
-	if temp == ""{
+	if temp == "" {
 		err := fmt.Errorf("WriteGitShellFile temp is null")
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 
 	if HomePath == "" {
 		err := fmt.Errorf("ReadGitShellTmp HomePath is null")
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 	var err error
 	targetFileName := "gitShell.sh"
@@ -88,7 +88,7 @@ func WriteGitShellFile(temp string) (string,error) {
 	f, err := os.OpenFile(targetFilePath, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
 	if err != nil {
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 
 	// 这里不关闭，就会不能执行里面的文件
@@ -102,7 +102,7 @@ func WriteGitShellFile(temp string) (string,error) {
 	commitInfo, err = inputReader.ReadString('\n')
 	if err != nil {
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 	commitInfo = strings.ReplaceAll(commitInfo, "\n", "")
 	log.Println(commitInfo)
@@ -114,48 +114,51 @@ func WriteGitShellFile(temp string) (string,error) {
 	gitTemp, err = gitTemp.Parse(temp)
 	if err != nil {
 		log.Println(err)
-		return "",err
+		return "", err
 	}
-
 
 	if Conf.Git.GitEmail == "" {
 		err := fmt.Errorf("Conf.Git.GitEmail is null")
 		log.Println(err)
-		return "",err
+		return "", err
 	}
 
 	if Conf.Git.GitName == "" {
 		err := fmt.Errorf("Conf.Git.GitName is null")
 		log.Println(err)
-		return "",err
+		return "", err
 	}
-
-	
 
 	// 实例化一个GitShellInfo对象  更本地项目连接在一起
 	gitShellInfo := &GitShellInfo{
 		GitShellFilePath: HomePath,
-		 CommitInfo: commitInfo,
-		 GitEmail: Conf.Git.GitEmail,
-		 GitName: Conf.Git.GitName,
-		}
+		CommitInfo:       commitInfo,
+		GitEmail:         Conf.Git.GitEmail,
+		GitName:          Conf.Git.GitName,
+	}
+
+	// 验证器
+	_,err = valid.ValidateStruct(gitShellInfo)
+	if err!=nil{
+		log.Println(err)
+		return "",err
+	}
 
 	// 模板填充
 	err = gitTemp.Execute(f, gitShellInfo)
 	if err != nil {
 		log.Println(err)
-		return "",err
+		return "", err
 	}
-	return targetFilePath,nil
+	return targetFilePath, nil
 }
 
-
 // GitCmd 执行gitShellFile文件
-func GitCmd()error{
-	
-	log.Println("当前的操作系统",runtime.GOOS)
+func GitCmd() error {
 
-	if runtime.GOOS!="linux"{
+	log.Println("当前的操作系统", runtime.GOOS)
+
+	if runtime.GOOS != "linux" {
 		err := fmt.Errorf("暂时不支持linux系统意外的操作系统")
 		log.Println(err)
 		return err
@@ -169,14 +172,14 @@ func GitCmd()error{
 	}
 
 	// 根据模板写入文件
-	gitShellFilePath,err := WriteGitShellFile(temp)
+	gitShellFilePath, err := WriteGitShellFile(temp)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
-	log.Println("gitShellFilePath:",gitShellFilePath)
+	log.Println("gitShellFilePath:", gitShellFilePath)
 	// 执行文件
-	cmd := exec.Command("/bin/bash","-c",gitShellFilePath)
+	cmd := exec.Command("/bin/bash", "-c", gitShellFilePath)
 	log.Println(cmd.Args)
 
 	data, err := cmd.Output()
@@ -187,7 +190,3 @@ func GitCmd()error{
 	log.Println(string(data))
 	return nil
 }
-
-
-
-
