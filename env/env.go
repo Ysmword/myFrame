@@ -17,7 +17,7 @@ import (
 var GitFlag = flag.String("acp", "not", "enable auto submit yes or not,defualt value is not")
 
 // GracefulFlag 优雅重启服务
-var GracefulFlag = flag.Bool("-g", false, "graceful restart service")
+var GracefulFlag = flag.Bool("g", false, "graceful restart service")
 
 // InitAll 初始化项目
 func InitAll() {

@@ -136,9 +136,9 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 // StartServer 开启服务 GracefulFlag 是否优雅重启
 func StartServer(GracefulFlag bool) {
-	log.Println(GracefulFlag)
-	// 这里进行路由注册 serviceObjectTable["exmple"] = &ControllerInfo{....}
-
+	
+	// 这里进行路由注册 serviceObjectTable["/exmple"] = &ControllerInfo{....}
+	serviceObjectTable["/hello"] = &ControllerInfo{Path: "/hello",Fn: controllers.Hello,APIName:"哈喽世界",Available:true,isFileSystem:false,isWebSocket:false}
 	// 这里搞个可以搞一个热更新
 	if !common.Conf.HotUpate.IsOpen {
 		server := http.Server{
