@@ -213,7 +213,7 @@ func ListenHandler(server *http.Server, listener net.Listener) {
 				if runtime.GOOS == "windows" {
 					cmd = exec.Command(common.Conf.ExecutablePath.WinExecutablePath, "-g")
 				} else if runtime.GOOS == "linux" {
-					cmd = exec.Command("./"+common.Conf.ExecutablePath.WinExecutablePath, "-g")
+					cmd = exec.Command("./"+common.Conf.ExecutablePath.LinuxExecutablePath, "-g")
 				}
 				log.Println(cmd.Args)
 				cmd.ExtraFiles = []*os.File{currentFD}
