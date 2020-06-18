@@ -14,6 +14,9 @@ var (
 	HomePath string
 	// WsUserTable 创建一个websocket用户表
 	WsUserTable = make(map[*websocket.Conn]string)
+
+	// LastModifiedTime 最新修改时间
+	LastModifiedTime string
 	
 
 	// 发送用户
@@ -33,6 +36,14 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// 查看整个项目文件是否有增加
+	fileInfo,err :=os.Stat(HomePath)
+	if err!=nil{
+		log.Println(err)
+		return
+	}
+	// 记录修改时间
+	LastModifiedTime = fileInfo.ModTime().String()
 }
 
 // SendMail 使用框架发送邮件（不包含文件），毕竟是使用第三方的东西，学校网，不能够发送

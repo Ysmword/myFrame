@@ -8,13 +8,18 @@ import (
 	valid "github.com/asaskevich/govalidator"
 )
 
+// ConfigPath 配置文件的路径
+var ConfigPath string
+
 // Config 配置
 type Config struct {
-	AppConf  `valid:"required"`
-	Addr     `valid:"required"`
-	Postgres 
-	Git      
+	AppConf `valid:"required"`
+	Addr    `valid:"required"`
+	Postgres
+	Git
 	SecretKey
+	HotUpate
+	ExecutablePath
 }
 
 // AppConf app基础配置
@@ -55,8 +60,19 @@ type Git struct {
 }
 
 // SecretKey 密钥
-type SecretKey  struct{
-	SecretKey  string `json:"secretKey " valid:"type(string)"`
+type SecretKey struct {
+	SecretKey string `json:"secretKey " valid:"type(string)"`
+}
+
+// HotUpate 热更新
+type HotUpate struct {
+	IsOpen bool `json:"isOpen"`
+}
+
+// ExecutablePath 可执行文件路径
+type ExecutablePath struct {
+	WinExecutablePath   string `json:"WinExecutablePath"`
+	LinuxExecutablePath string `json:"LinuxExecutablePath"`
 }
 
 func init() {
@@ -81,6 +97,10 @@ func init() {
 		log.Println("sslmode value is not disable or allow ro prefer or require or verify-ca or verify-full")
 		return false
 	})
+	if HomePath == "" {
+		log.Fatal("初始化app路径失败，HomePath = ", HomePath)
+	}
+	ConfigPath = HomePath + "/" + "conf.ini"
 }
 
 // Conf 配置变量
@@ -89,17 +109,9 @@ var Conf = new(Config)
 // ReadConfig 读取配置文件
 func ReadConfig() {
 
-	HomePath = "G:/MyFrame"   // 用于测试
+	log.Println("配置文件路径", ConfigPath)
 
-	if HomePath == "" {
-		log.Fatal("初始化app路径失败，HomePath = ", HomePath)
-	}
-
-	configPath := HomePath + "/" + "conf.ini"
-
-	log.Println("配置文件路径", configPath)
-
-	err := gcfg.ReadFileInto(Conf, configPath)
+	err := gcfg.ReadFileInto(Conf, ConfigPath)
 	if err != nil {
 		log.Fatal("gcfg.ReadFileInto error:", err)
 	}

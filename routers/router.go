@@ -1,14 +1,32 @@
 package routers
 
 import (
+	"context"
 	"fmt"
 	"helloweb/common"
 	"helloweb/controllers"
 	"helloweb/logger"
 	"log"
+	"net"
 	"net/http"
+	"os"
+	"os/exec"
+	"runtime"
 	"strings"
+	"time"
 )
+
+// mux 服务对象表
+var serviceObjectTable = make(map[string]*ControllerInfo)
+
+// hellowebHTTPHandler 广州美术学院同学的app
+type hellowebHTTPHandler struct{}
+
+// specialString 不必要的路由
+var specialString = "/favicon.ico"
+
+// LastModifiedTime 最新修改时间
+var LastModifiedTime string
 
 // ControllerInfo 保存有关控制器的信息
 type ControllerInfo struct {
@@ -31,14 +49,14 @@ type ControllerInfo struct {
 	isWebSocket bool
 }
 
-// mux 服务对象表
-var serviceObjectTable = make(map[string]*ControllerInfo)
-
-// hellowebHTTPHandler 广州美术学院同学的app
-type hellowebHTTPHandler struct{}
-
-// 不必要的路由
-var specialString = "/favicon.ico"
+func init() {
+	fileInfo, err := os.Stat(common.ConfigPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	LastModifiedTime = fileInfo.ModTime().String()
+	log.Println("LastModifiedTime", LastModifiedTime)
+}
 
 // ServiceHttp 服务
 func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -71,13 +89,13 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		api = r.URL.String()
 	}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
-    w.Header().Set("Access-Control-Allow-Headers", "Action, Module")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Action, Module")
 	logger.Z.Info(api)
 	// h找到对应的对象，ok表示一种状态
 	if h, ok := serviceObjectTable[api]; ok {
 		// 一开始先判断是不是静态文件服务器接口
-		if h.isFileSystem || h.isWebSocket{
+		if h.isFileSystem || h.isWebSocket {
 			// 文件服务器
 			h.Fn(w, r)
 		} else {
@@ -120,13 +138,98 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 func StartServer() {
 
 	// 这里进行路由注册 serviceObjectTable["exmple"] = &ControllerInfo{....}
-	
-	server := http.Server{
-		Addr:    ":" + common.Conf.AppConf.Httpport,
-		Handler: &hellowebHTTPHandler{},
+
+	// 这里搞个可以搞一个热更新
+	if !common.Conf.HotUpate.IsOpen {
+		server := http.Server{
+			Addr:    ":" + common.Conf.AppConf.Httpport,
+			Handler: &hellowebHTTPHandler{},
+		}
+		if err := server.ListenAndServe(); err != nil {
+			log.Fatal("开启服务失败", err)
+		}
+	} else {
+		var err error
+		var listener net.Listener
+		if len(os.Args) > 1 {
+			f := os.NewFile(3, "")
+			listener, err = net.FileListener(f)
+			log.Println("优雅执行热更新")
+		} else {
+			listener, err = net.Listen("tcp", ":"+common.Conf.AppConf.Httpport)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		server := http.Server{
+			Handler: &hellowebHTTPHandler{},
+		}
+
+		go func() {
+			err := server.Serve(listener)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
+		ListenHandler(&server, listener)
+	}
+}
+
+// ListenHandler 信号处理器，这里监听配置文件的变化
+func ListenHandler(server *http.Server, listener net.Listener) {
+
+	// 设置十秒的的监听器
+	ticker := time.NewTicker(10 * time.Second)
+
+	for {
+		select {
+		case <-ticker.C:
+			var err error
+			var fileInfo os.FileInfo
+			var cmd *exec.Cmd
+			fileInfo, err = os.Stat(common.ConfigPath)
+			if err != nil {
+				log.Println("重启不成功")
+				log.Println("错误原因为：", err)
+				break
+			}
+			if fileInfo.ModTime().String() != LastModifiedTime {
+				LastModifiedTime = fileInfo.ModTime().String()
+				// 这里优雅的关闭已有的服务，防止没有运行完以后的连接
+				ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+				// 父子进程拷贝
+				t1, ok := listener.(*net.TCPListener)
+				if !ok {
+					log.Println("listener is not tcp listener")
+					log.Println("重启不成功")
+					break
+				}
+				currentFD, err := t1.File()
+				if err != nil {
+					log.Println("acquiring listener file failed", err)
+					log.Println("重启不成功")
+					break
+				}
+				if runtime.GOOS == "windows" {
+					cmd = exec.Command(common.Conf.ExecutablePath.WinExecutablePath, "-gracefull")
+				} else if runtime.GOOS == "linux" {
+					cmd = exec.Command(common.Conf.ExecutablePath.WinExecutablePath, "-gracefull")
+				}
+				log.Println(cmd.Args)
+				cmd.ExtraFiles = []*os.File{currentFD}
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
+				err = cmd.Start()
+				if err != nil {
+					log.Println("重启不成功")
+					log.Println("错误原因为：", err)
+					break
+				}
+				// 优雅的服务,放在前面也不行，因为会立即关闭的
+				server.Shutdown(ctx)
+			}
+
+		}
 	}
 
-	if err := server.ListenAndServe(); err != nil {
-		log.Fatal("开启服务失败,err = ", err)
-	}
 }

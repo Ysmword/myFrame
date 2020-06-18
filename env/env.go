@@ -19,7 +19,7 @@ var GitFlag = flag.String("acp", "not", "enable auto submit yes or not,defualt v
 // InitAll 初始化项目
 func InitAll() {
 
-	// valid.SetFieldsRequiredByDefault(true)
+	common.Monitor()
 
 	log.Println("读取配置文件")
 	common.ReadConfig()
