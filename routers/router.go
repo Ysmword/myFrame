@@ -204,6 +204,7 @@ func ListenHandler(server *http.Server, listener net.Listener) {
 					log.Println("重启不成功")
 					break
 				}
+				// 这里不支持win
 				currentFD, err := t1.File()
 				if err != nil {
 					log.Println("acquiring listener file failed", err)

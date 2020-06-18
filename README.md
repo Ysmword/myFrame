@@ -21,9 +21,17 @@
 - 静态服务器搭建（运行之后，可以直接访问：http://localhost:端口/file，就可以看到整个项目的静态文件）
 - 一键生成数据库表的结构体映射文件
 - 日志处理
+- 添加cookie
+- 热更新部署
 
 
 ## 有一处bug：调用github.com/asaskevich/govalidator验证器的时候，无法实现optional的功能（为空值的时候，跳过验证）
 - github.com/asaskevich/govalidator看他们的issue，提供的方法是来去这个项目
     - go get github.com/asaskevich/govalidator@772b7c5f8a56857abeff450a08976b680d67f732 能够解决，但是在这里不能实现
     - 解决办法：后期自己写一个验证器
+
+## 热更新部署的方式
+    - 配置文件中开启热更新isOpen=true
+    - 将编译好的文件服务器上
+    - 修改配置文件中的LinuxExecutablePath的值即可
+    - 注意不能在win上运行
