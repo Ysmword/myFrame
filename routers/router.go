@@ -134,9 +134,9 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// StartServer 开启服务
-func StartServer() {
-
+// StartServer 开启服务 GracefulFlag 是否优雅重启
+func StartServer(GracefulFlag bool) {
+	log.Println(GracefulFlag)
 	// 这里进行路由注册 serviceObjectTable["exmple"] = &ControllerInfo{....}
 
 	// 这里搞个可以搞一个热更新
@@ -151,7 +151,7 @@ func StartServer() {
 	} else {
 		var err error
 		var listener net.Listener
-		if len(os.Args) > 1 {
+		if  GracefulFlag {
 			f := os.NewFile(3, "")
 			listener, err = net.FileListener(f)
 			log.Println("优雅执行热更新")
@@ -211,9 +211,9 @@ func ListenHandler(server *http.Server, listener net.Listener) {
 					break
 				}
 				if runtime.GOOS == "windows" {
-					cmd = exec.Command(common.Conf.ExecutablePath.WinExecutablePath, "-gracefull")
+					cmd = exec.Command(common.Conf.ExecutablePath.WinExecutablePath, "-g")
 				} else if runtime.GOOS == "linux" {
-					cmd = exec.Command(common.Conf.ExecutablePath.WinExecutablePath, "-gracefull")
+					cmd = exec.Command("./"+common.Conf.ExecutablePath.WinExecutablePath, "-g")
 				}
 				log.Println(cmd.Args)
 				cmd.ExtraFiles = []*os.File{currentFD}
