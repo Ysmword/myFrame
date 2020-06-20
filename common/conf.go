@@ -20,6 +20,8 @@ type Config struct {
 	SecretKey
 	HotUpate
 	ExecutablePath
+	RedevDebug
+	FTP
 }
 
 // AppConf app基础配置
@@ -73,6 +75,25 @@ type HotUpate struct {
 type ExecutablePath struct {
 	WinExecutablePath   string `json:"WinExecutablePath"`
 	LinuxExecutablePath string `json:"LinuxExecutablePath"`
+}
+
+// RedevDebug 远程开发调试
+type RedevDebug struct {
+	ReDebug bool `json:"reDebug"`
+}
+
+// FTP 远程服务器
+type FTP struct {
+	// User 用户
+	User string `json:"user"`
+	// 传输端口
+	Port int `json:"port"`
+	// 主机
+	Host string `json:"host"`
+	// 密码
+	Password string `json:"password"`
+	// 上传保存路径
+	SavePath string `json:"savePath"`
 }
 
 func init() {
