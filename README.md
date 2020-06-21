@@ -23,6 +23,7 @@
 - 日志处理
 - 添加cookie
 - 热更新部署
+- 远程调试开发
 
 
 ## 有一处bug：调用github.com/asaskevich/govalidator验证器的时候，无法实现optional的功能（为空值的时候，跳过验证）
@@ -35,3 +36,16 @@
     - 将编译好的文件服务器上
     - 修改配置文件中的LinuxExecutablePath的值即可
     - 注意不能在win上运行
+
+## 开启远程调试开发地方法
+    - 在配置文件中添加：
+        [RedevDebug]
+        reDebug = false
+
+        ; ftp 服务器
+        [FTP]
+        User = 用户名字
+        port = 22
+        host = 服务器IP地址
+        password = 密码
+        savePath = 存储编译文件地路径

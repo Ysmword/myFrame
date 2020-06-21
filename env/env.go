@@ -8,8 +8,8 @@ import (
 	"helloweb/models"
 	"helloweb/routers"
 	"log"
-	"time"
 	"os"
+	"time"
 	// valid "github.com/asaskevich/govalidator"
 )
 
@@ -18,6 +18,9 @@ var GitFlag = flag.String("acp", "not", "enable auto submit yes or not,defualt v
 
 // GracefulFlag 优雅重启服务
 var GracefulFlag = flag.Bool("g", false, "graceful restart service")
+
+// Redebug 远程开发调试
+var Redebug = flag.Bool("r", false, "Remote development and debugging")
 
 // InitAll 初始化项目
 func InitAll() {
@@ -41,6 +44,16 @@ func InitAll() {
 	default:
 		log.Println("输入不正确，可以参考：-acp=yes")
 		os.Exit(0)
+	}
+
+	// 开启远程调试
+	if *Redebug {
+		log.Println("开启远程调试")
+		err := common.UploadRun()
+		if err!=nil{
+			log.Println(err)
+			return
+		}
 	}
 
 	log.Println("初始化日志文件")

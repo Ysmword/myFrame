@@ -15,7 +15,7 @@ require (
 	github.com/wendal/errors v0.0.0-20130201093226-f66c77a7882b
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200311171314-f7b00557c8c4
-	google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11 // indirect
+	google.golang.org/genproto v0.0.0-20200612171551-7676ae05be11
 	gopkg.in/gcfg.v1 v1.2.3
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
