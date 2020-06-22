@@ -47,6 +47,9 @@ type ControllerInfo struct {
 
 	// 是否是websocket接口
 	isWebSocket bool
+
+	// 该接口是否开启需要开启调度
+	isOpenschedule bool
 }
 
 func init() {
@@ -99,22 +102,42 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 			// 文件服务器
 			h.Fn(w, r)
 		} else {
-			result, err = h.Fn(w, r)
-			if err != nil {
-				err = fmt.Errorf("运行接口%v的时候报错，err:%v", r.URL.String(), err)
-				logger.Z.Error(err.Error())
-				if err = controllers.ErrorResp(w, r, err.Error()); err != nil {
-					logger.Z.Error(r.URL.String() + ",运行报错")
+			if h.isOpenschedule {
+				if h.Available {
+					// 开启调度
+					err = controllers.AddJobChannel(w, r, h.Fn)
+					// 要是这里没有进行等待的时候，w.Write会发送错误，因为w已经关闭了
+					controllers.SchedulerWg.Wait()
+					if err != nil {
+						logger.Z.Error(err.Error())
+						if err = controllers.ErrorResp(w, r, err.Error()); err != nil {
+							logger.Z.Error(r.URL.String() + ",运行报错")
+						}
+					}
+				}else{
+					if err = controllers.ErrorResp(w, r, "该接口不可用"); err != nil {
+						logger.Z.Error(r.URL.String() + ",运行报错")
+					}
 				}
 			} else {
-				if h.Available == true {
-					if err = controllers.SuccessResp(w, r, result); err != nil {
+				// 不开启调度
+				result, err = h.Fn(w, r)
+				if err != nil {
+					err = fmt.Errorf("运行接口%v的时候报错，err:%v", r.URL.String(), err)
+					logger.Z.Error(err.Error())
+					if err = controllers.ErrorResp(w, r, err.Error()); err != nil {
 						logger.Z.Error(r.URL.String() + ",运行报错")
 					}
 				} else {
-					logger.Z.Info("该接口不可用")
-					if err = controllers.ErrorResp(w, r, "该接口不可用"); err != nil {
-						logger.Z.Error(r.URL.String() + ",运行报错")
+					if h.Available == true {
+						if err = controllers.SuccessResp(w, r, result); err != nil {
+							logger.Z.Error(r.URL.String() + ",运行报错")
+						}
+					} else {
+						logger.Z.Info("该接口不可用")
+						if err = controllers.ErrorResp(w, r, "该接口不可用"); err != nil {
+							logger.Z.Error(r.URL.String() + ",运行报错")
+						}
 					}
 				}
 			}
@@ -136,9 +159,11 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 
 // StartServer 开启服务 GracefulFlag 是否优雅重启
 func StartServer(GracefulFlag bool) {
-	
+
 	// 这里进行路由注册 serviceObjectTable["/exmple"] = &ControllerInfo{....}
-	serviceObjectTable["/hello"] = &ControllerInfo{Path: "/hello",Fn: controllers.Hello,APIName:"哈喽世界",Available:true,isFileSystem:false,isWebSocket:false}
+	serviceObjectTable["/hello"] = &ControllerInfo{Path: "/hello", Fn: controllers.Hello, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: true}
+	serviceObjectTable["/hello1"] = &ControllerInfo{Path: "/hello1", Fn: controllers.Hello, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: false}
+	serviceObjectTable["/hello2"] = &ControllerInfo{Path: "/hello2", Fn: controllers.Hello, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: true}
 	// 这里搞个可以搞一个热更新
 	if !common.Conf.HotUpate.IsOpen {
 		server := http.Server{
@@ -151,7 +176,7 @@ func StartServer(GracefulFlag bool) {
 	} else {
 		var err error
 		var listener net.Listener
-		if  GracefulFlag {
+		if GracefulFlag {
 			f := os.NewFile(3, "")
 			listener, err = net.FileListener(f)
 			log.Println("优雅执行热更新")
@@ -232,5 +257,4 @@ func ListenHandler(server *http.Server, listener net.Listener) {
 
 		}
 	}
-
 }

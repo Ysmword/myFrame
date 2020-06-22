@@ -93,7 +93,7 @@ func SuccessResp(w http.ResponseWriter, r *http.Request, result interface{}) err
 	resp.API = r.URL.String()
 	resp.Method = r.Method
 	resp.RowCount = 0
-
+	
 	response, err := json.Marshal(resp)
 	if err != nil {
 		err = fmt.Errorf(" SuccessResp json.Marshal error:%v", err)

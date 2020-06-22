@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"helloweb/common"
+	"helloweb/controllers"
 	"helloweb/logger"
 	"helloweb/models"
 	"helloweb/routers"
@@ -61,6 +62,11 @@ func InitAll() {
 
 	log.Println("初始化数据库")
 	models.InitDB()
+
+	log.Println("将调度器挂起来")
+	dispatcher := controllers.NewDispatcher()
+	dispatcher.Run()
+
 
 	log.Println("开启服务")
 	s := `
