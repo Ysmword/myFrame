@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"helloweb/logger"
 	"log"
 	"net/http"
@@ -159,9 +158,4 @@ func Limit(work Job) bool {
 		JobChannel <- work
 		return true
 	}
-}
-
-// AddJobChannel 添加任务
-func AddJobChannel(w http.ResponseWriter, r *http.Request, fn func(http.ResponseWriter, *http.Request) (interface{}, error)) error {
-
 }
