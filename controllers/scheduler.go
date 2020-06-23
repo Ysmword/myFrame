@@ -15,10 +15,10 @@ import (
 // 有任务就加入到工作池
 
 // MaxWorkers 最大的工作者数量
-var MaxWorkers = 10
+var MaxWorkers = 1000
 
 // DispatchNumControl 用于控制并发处理的协程数
-var DispatchNumControl = make(chan bool, 30)
+var DispatchNumControl = make(chan bool, 10000)
 
 // SchedulerWg 调度协程组
 var SchedulerWg sync.WaitGroup

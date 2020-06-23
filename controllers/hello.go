@@ -17,6 +17,8 @@ func Hello(w http.ResponseWriter,r *http.Request)(interface{},error){
 		logger.Z.Info(err.Error())
 		return nil,err
 	}
+	time.Sleep(30*time.Second)
+	logger.Z.Info("30s")
 	return "hello world",nil
 }
 
@@ -30,6 +32,8 @@ func Hello1(w http.ResponseWriter,r *http.Request)(interface{},error){
 		return nil,err
 	}
 	logger.Z.Info("hello world1")
+	time.Sleep(30*time.Second)
+	logger.Z.Info("30s")
 	return "hello world1",nil
 }
 
@@ -43,6 +47,7 @@ func Hello2(w http.ResponseWriter,r *http.Request)(interface{},error){
 		return nil,err
 	}
 	logger.Z.Info("hello world2")
-	time.Sleep(2*time.Second)
+	time.Sleep(30*time.Second)
+	logger.Z.Info("30s")
 	return "hello world2",nil
 }

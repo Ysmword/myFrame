@@ -169,8 +169,8 @@ func StartServer(GracefulFlag bool) {
 
 	// 这里进行路由注册 serviceObjectTable["/exmple"] = &ControllerInfo{....}
 	serviceObjectTable["/hello"] = &ControllerInfo{Path: "/hello", Fn: controllers.Hello, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: true}
-	serviceObjectTable["/hello1"] = &ControllerInfo{Path: "/hello1", Fn: controllers.Hello, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: false}
-	serviceObjectTable["/hello2"] = &ControllerInfo{Path: "/hello2", Fn: controllers.Hello, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: true}
+	serviceObjectTable["/hello1"] = &ControllerInfo{Path: "/hello1", Fn: controllers.Hello1, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: true}
+	serviceObjectTable["/hello2"] = &ControllerInfo{Path: "/hello2", Fn: controllers.Hello2, APIName: "哈喽世界", Available: true, isFileSystem: false, isWebSocket: false, isOpenschedule: true}
 	// 这里搞个可以搞一个热更新
 	if !common.Conf.HotUpate.IsOpen {
 		server := http.Server{
