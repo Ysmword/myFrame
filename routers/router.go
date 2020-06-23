@@ -104,17 +104,24 @@ func (g *hellowebHTTPHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) 
 		} else {
 			if h.isOpenschedule {
 				if h.Available {
-					// 开启调度
-					err = controllers.AddJobChannel(w, r, h.Fn)
+					// 添加调度
+					var err error
+					payload := controllers.Payload{W: w, R: r, Fn: h.Fn}
+					job := controllers.Job{Payload: payload,Finish: make(chan bool,1)}
+					if !controllers.Limit(job) {
+						err = fmt.Errorf("服务器正忙，请稍后")
+						logger.Z.Error(err.Error())
+					}
 					// 要是这里没有进行等待的时候，w.Write会发送错误，因为w已经关闭了
-					controllers.SchedulerWg.Wait()
+					<-job.Finish
 					if err != nil {
 						logger.Z.Error(err.Error())
 						if err = controllers.ErrorResp(w, r, err.Error()); err != nil {
 							logger.Z.Error(r.URL.String() + ",运行报错")
 						}
 					}
-				}else{
+
+				} else {
 					if err = controllers.ErrorResp(w, r, "该接口不可用"); err != nil {
 						logger.Z.Error(r.URL.String() + ",运行报错")
 					}

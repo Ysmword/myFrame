@@ -34,6 +34,7 @@ type Payload struct {
 // Job 工作
 type Job struct {
 	Payload Payload
+	Finish  chan bool
 }
 
 // JobChannel 任务队列，用于接收任务
@@ -86,8 +87,8 @@ func (w *Worker) Start() {
 					}
 				}
 				logger.Z.Info("释放协程")
-				SchedulerWg.Done()
 				<-DispatchNumControl
+				job.Finish <- true
 			case <-w.Quit:
 				// 接收到退出信号
 				return
@@ -151,6 +152,7 @@ func Limit(work Job) bool {
 	select {
 	case <-time.After(time.Second * 1):
 		logger.Z.Info("我很忙")
+		work.Finish <- true
 		return false
 	case DispatchNumControl <- true:
 		logger.Z.Info("JobChannel <- work")
@@ -161,14 +163,5 @@ func Limit(work Job) bool {
 
 // AddJobChannel 添加任务
 func AddJobChannel(w http.ResponseWriter, r *http.Request, fn func(http.ResponseWriter, *http.Request) (interface{}, error)) error {
-	payload := Payload{W: w, R: r, Fn: fn}
-	job := Job{Payload: payload}
-	if !Limit(job) {
-		err := fmt.Errorf("服务器正忙，请稍后")
-		logger.Z.Error(err.Error())
-		return err
-	}else{
-		SchedulerWg.Add(1)
-	}
-	return nil
+
 }

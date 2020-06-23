@@ -27,7 +27,7 @@ func BenchmarkScheduler(b *testing.B){
 		wg.Add(1)
 		go func(i int){
 			defer wg.Done()
-			resp,err := http.Get(urls[rand.Intn(2)])
+			resp,err := http.Get(urls[rand.Intn(3)])
 			if err!=nil{
 				b.Error(err)
 				a++
